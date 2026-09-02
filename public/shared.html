@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<title>Shared file · CloudDrive</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-page">
+<main class="auth-wrap">
+  <section class="auth-card share-card" id="card" aria-live="polite">
+    <div class="auth-brand"><span class="brand-mark">☁️</span><span>CloudDrive</span></div>
+    <div class="loading-inline"><div class="spinner"></div><p>Loading shared file…</p></div>
+  </section>
+</main>
+<script>
+(async()=>{
+  const token = new URLSearchParams(location.search).get("token");
+  const card = document.getElementById("card");
+  if(!token){
+    card.innerHTML = '<div class="auth-brand"><span class="brand-mark">☁️</span><span>CloudDrive</span></div><h1>Invalid link</h1><p class="muted">This sharing link is missing or incomplete.</p>';
+    return;
+  }
+  try {
+    const r = await fetch("/api/public/share/"+encodeURIComponent(token));
+    const x = await r.json().catch(()=>({success:false,message:"Invalid server response"}));
+    if(!x.success){
+      card.innerHTML = '<div class="auth-brand"><span class="brand-mark">☁️</span><span>CloudDrive</span></div><h1>Share unavailable</h1><p class="muted">'+escapeHtml(x.message||"This file could not be found.")+'</p>';
+      return;
+    }
+    const f = x.data.file;
+    card.innerHTML = '<div class="auth-brand"><span class="brand-mark">☁️</span><span>CloudDrive</span></div>'+
+      '<div class="share-file-icon">📄</div><h1 class="file-title">'+escapeHtml(f.name)+'</h1>'+
+      '<p class="muted">'+escapeHtml(f.mimeType||"File")+' · '+formatSize(f.size)+'</p>'+
+      '<a class="btn primary btn-full" href="/api/public/share/'+encodeURIComponent(token)+'/download">Download file</a>';
+  } catch {
+    card.innerHTML = '<div class="auth-brand"><span class="brand-mark">☁️</span><span>CloudDrive</span></div><h1>Unable to load</h1><p class="muted">Please check your connection and try again.</p>';
+  }
+})();
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function formatSize(n){if(!n)return"0 B";const u=["B","KB","MB","GB","TB"];let i=Math.min(Math.floor(Math.log(n)/Math.log(1024)),u.length-1);return(n/1024**i).toFixed(i?1:0)+" "+u[i]}
+</script>
+</body>
+</html>

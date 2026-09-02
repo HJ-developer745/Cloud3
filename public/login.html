@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<title>Login · CloudDrive</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="auth-page">
+<main class="auth-wrap">
+  <section class="auth-card" aria-labelledby="login-title">
+    <div class="auth-brand"><span class="brand-mark">☁️</span><span>CloudDrive</span></div>
+    <div class="auth-heading">
+      <h1 id="login-title">Welcome back</h1>
+      <p>Sign in to access your files.</p>
+    </div>
+    <form id="loginForm" novalidate>
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Your password" required>
+      <button id="loginBtn" class="btn primary btn-full" type="submit">Login</button>
+      <p id="msg" class="error" role="alert" aria-live="polite"></p>
+    </form>
+    <p class="auth-footer">New here? <a href="/register.html">Create an account</a></p>
+  </section>
+</main>
+<script>
+const loginForm = document.getElementById("loginForm");
+const loginMsg = document.getElementById("msg");
+const loginBtn = document.getElementById("loginBtn");
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  loginMsg.textContent = "";
+  loginBtn.disabled = true;
+  loginBtn.textContent = "Signing in…";
+  try {
+    const r = await fetch("/api/auth/login", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      credentials:"include", body:JSON.stringify(Object.fromEntries(new FormData(loginForm)))
+    });
+    const x = await r.json().catch(() => ({success:false,message:"Invalid server response"}));
+    if (x.success) location.href = "/";
+    else loginMsg.textContent = x.message || "Login failed";
+  } catch {
+    loginMsg.textContent = "Unable to connect. Please try again.";
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.textContent = "Login";
+  }
+});
+</script>
+</body>
+</html>

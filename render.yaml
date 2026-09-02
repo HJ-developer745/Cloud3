@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: clouddrive
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: MAX_FILE_SIZE
+        value: "524288000"
+      - key: STORAGE_QUOTA
+        value: "16106127360"
+      - key: TRASH_RETENTION_DAYS
+        value: "30"
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DEMO_EMAIL
+        sync: false
+      - key: DEMO_PASSWORD
+        sync: false
